@@ -1,0 +1,24 @@
+{
+  "version": 1,
+  "project": "",
+  "technical_gate": {
+    "status": "blocked",
+    "requires_checker_pass": true,
+    "opened_at": null,
+    "blockers": []
+  },
+  "decisions": [
+    {
+      "id": "decision-example",
+      "feature": "example feature",
+      "selected": "existing project pattern",
+      "status": "lock_now",
+      "reason": "Matches current stack and avoids new dependency.",
+      "alternatives": [],
+      "install": null,
+      "usage_boundary": "Use only for the scoped feature.",
+      "owned_files": [],
+      "fallback": "Use existing local implementation."
+    }
+  ]
+}

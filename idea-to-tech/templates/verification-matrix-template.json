@@ -1,0 +1,18 @@
+{
+  "version": 1,
+  "items": [
+    {
+      "id": "verify-example",
+      "feature_id": "feature-example",
+      "risk": "medium",
+      "unit": [],
+      "integration": [],
+      "e2e_or_manual": [],
+      "build_type_lint": ["run focused build/type checks when available"],
+      "mock_acceptance": "mock behavior must be labeled",
+      "real_acceptance": "real API path verified",
+      "blocking_failures": [],
+      "non_blocking_failures": []
+    }
+  ]
+}

@@ -1,0 +1,22 @@
+{
+  "version": 1,
+  "contracts": [
+    {
+      "id": "api-example",
+      "feature_id": "feature-example",
+      "status": "blocked",
+      "endpoint": null,
+      "method": null,
+      "request_shape": {},
+      "response_shape": {},
+      "auth": "session/token/env as project convention; never store secrets",
+      "pagination": null,
+      "streaming": null,
+      "upload": null,
+      "errors": [],
+      "retry_policy": null,
+      "mock_adapter": null,
+      "blockers": []
+    }
+  ]
+}

@@ -1,0 +1,26 @@
+{
+  "version": 1,
+  "features": [
+    {
+      "id": "feature-example",
+      "title": "Example feature",
+      "status": "planned",
+      "maturity_target": "functional-ready",
+      "pages": [],
+      "components": [],
+      "composables": [],
+      "stores": [],
+      "services": [],
+      "data_source": {
+        "mode": "mock-first",
+        "real_source": null,
+        "adapter": null
+      },
+      "states": ["loading", "empty", "error", "success"],
+      "permissions": [],
+      "cache_strategy": "none",
+      "failure_recovery": [],
+      "verification_refs": []
+    }
+  ]
+}
