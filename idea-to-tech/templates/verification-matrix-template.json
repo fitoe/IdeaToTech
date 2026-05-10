@@ -1,16 +1,18 @@
 {
-  "version": 1,
+  "version": 2,
   "items": [
     {
       "id": "verify-example",
       "feature_id": "feature-example",
-      "risk": "medium",
+      "risk": "R2",
+      "functional_maturity_target": "F3",
+      "mock_acceptance": [],
+      "local_interaction_acceptance": [],
+      "real_api_acceptance": [],
+      "edge_regression_acceptance": [],
       "unit": [],
       "integration": [],
       "e2e_or_manual": [],
-      "build_type_lint": ["run focused build/type checks when available"],
-      "mock_acceptance": "mock behavior must be labeled",
-      "real_acceptance": "real API path verified",
       "blocking_failures": [],
       "non_blocking_failures": []
     }

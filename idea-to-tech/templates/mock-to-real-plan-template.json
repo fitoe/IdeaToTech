@@ -1,0 +1,17 @@
+{
+  "version": 2,
+  "items": [
+    {
+      "id": "mock-real-example",
+      "feature_id": "feature-example",
+      "mock_area": "feature demo",
+      "current_behavior": "mocked",
+      "real_source": null,
+      "replacement_stage": "F4",
+      "adapter_seam": null,
+      "visible_label_required": true,
+      "real_claim_requires": [],
+      "verification_refs": []
+    }
+  ]
+}

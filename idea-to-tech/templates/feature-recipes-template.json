@@ -1,25 +1,87 @@
 {
-  "version": 1,
+  "version": 2,
   "features": [
     {
       "id": "feature-example",
       "title": "Example feature",
       "status": "planned",
-      "maturity_target": "functional-ready",
+      "complexity": "L2",
+      "risk": "R2",
+      "functional_maturity_target": "F3",
       "pages": [],
       "components": [],
-      "composables": [],
-      "stores": [],
-      "services": [],
-      "data_source": {
-        "mode": "mock-first",
-        "real_source": null,
-        "adapter": null
+      "file_map": {
+        "pages": [],
+        "components": [],
+        "services": [],
+        "adapters": [],
+        "stores": [],
+        "composables": [],
+        "types": [],
+        "mocks": [],
+        "tests": []
       },
+      "implementation_order": [
+        "types",
+        "mock data",
+        "service adapter",
+        "store/composable",
+        "UI binding",
+        "loading/empty/error states",
+        "real API wiring",
+        "verification"
+      ],
+      "data_source": {
+        "mode": "mock_then_real",
+        "source_confidence": "inferred",
+        "evidence": []
+      },
+      "state": {
+        "ownership": "component_local | route_query | store | server_cache | persistence",
+        "reset_conditions": []
+      },
+      "services": [],
+      "stores": [],
+      "composables": [],
       "states": ["loading", "empty", "error", "success"],
-      "permissions": [],
-      "cache_strategy": "none",
-      "failure_recovery": [],
+      "demo_path": {
+        "route": null,
+        "steps": [],
+        "success_signal": null
+      },
+      "real_completion_path": {
+        "requires": []
+      },
+      "mock_to_real": {
+        "mock_location": null,
+        "real_source": null,
+        "adapter_seam": null,
+        "visible_label_required": true,
+        "real_claim_requires": []
+      },
+      "config_requirements": [],
+      "platform_differences": {},
+      "fallback_behavior": {},
+      "performance_budget": {},
+      "visual_alignment": {
+        "missing_states_in_visual": [],
+        "visual_elements_without_function": [],
+        "requires_visual_deviation": false,
+        "needs_design_update": false
+      },
+      "testability": {
+        "mockable_boundaries": [],
+        "stable_selectors": [],
+        "avoid": []
+      },
+      "implementation_flexibility": {
+        "can_change_internal_component_split": true,
+        "can_adjust_small_helper_names": true,
+        "must_not_change_api_adapter_boundary": true,
+        "must_not_change_mock_to_real_contract": true
+      },
+      "must_not_do": [],
+      "technical_debt": [],
       "verification_refs": []
     }
   ]

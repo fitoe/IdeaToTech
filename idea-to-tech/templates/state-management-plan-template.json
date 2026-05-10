@@ -1,0 +1,15 @@
+{
+  "version": 2,
+  "states": [
+    {
+      "id": "state-example",
+      "feature_id": "feature-example",
+      "owner": "component_local | route_query | store | server_cache | persistence | realtime",
+      "files": [],
+      "lifecycle": [],
+      "reset_conditions": [],
+      "persistence": null,
+      "platform_notes": {}
+    }
+  ]
+}

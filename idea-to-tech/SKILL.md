@@ -9,227 +9,231 @@ description: Use when product features, page behaviors, existing project constra
 
 Turn product ideas, feature behavior, existing repository constraints, and integration facts into a compact technical implementation blueprint.
 
-This skill is not a UI designer and not a coding executor. It decides **how functionality should be implemented** so implementation agents can move quickly without choosing libraries, state shape, API boundaries, mock strategy, or verification strategy during coding.
+This skill is not a UI designer and not a coding executor. It decides **how functionality should be implemented** so implementation agents can move quickly without choosing libraries, state shape, API boundaries, mock strategy, file locations, or verification strategy during coding.
 
 Default outcome:
 - `technical-decisions.json`
 - `feature-recipes.json`
 - `verification-matrix.json`
-- optional `api-contracts.json`, `state-management-plan.json`, `mock-to-real-plan.json`, and `integration-plan.json`
+- optional `api-contracts.json`, `state-management-plan.json`, `mock-to-real-plan.json`, `integration-plan.json`, and `technical-spikes/*`
 - checker-passing `technical_gate`
 
 Standalone rule:
 - this skill can be used directly or routed by `PlanToDelivery`
-- `idea-to-design` may provide product/page/interaction inputs
+- `idea-to-design` may provide product/page/interaction/visual inputs
 - `design-to-code` consumes outputs during implementation
 
 Core rule:
-- implementation-time decisions should be front-loaded when they affect speed, consistency, dependencies, data flow, API integration, state, or verification
-- do not invent unsupported technology choices when the repository already has conventions
-- prefer existing code, installed dependencies, and project conventions before adding libraries
-- add dependencies only when the feature complexity justifies them and the decision is recorded
+- prefer existing project conventions, nearby patterns, and installed dependencies before new architecture
+- front-load only decisions that affect speed, consistency, dependencies, data flow, API integration, state, platform compatibility, risk, or verification
+- keep tiny local details lightweight; do not produce architecture documents for a button click
 - risky or uncertain approaches require a small spike before locking the decision
-- keep outputs machine-readable and compact; long prose is traceability, not the default implementation input
+- mock is allowed as planned delivery; fake completion is not
+- keep outputs machine-readable and compact; long prose is traceability, not default implementation input
 
 ## When to Use
 
 Use when:
-- implementation would otherwise need to choose libraries or architecture during coding
-- features need API, state, mock, permission, streaming, upload, charting, map, form, or cache strategy
-- a project needs mock-to-real transition planning
+- implementation would otherwise need to choose libraries, architecture, state, API seams, or verification during coding
+- features need API, state, mock, permission, streaming, upload, charting, map, form, cache, platform, or performance strategy
 - `design-to-code` needs functional/technical inputs in addition to visual blueprint
 - `PlanToDelivery` needs a technical gate before execution
 
 Do not use when:
 - the task is only visual style exploration
 - the feature is tiny and the existing project pattern is obvious
-- the user only asks for final code and no meaningful technical decision exists
-- the task is backend-only architecture beyond the current implementation milestone; use a system architecture skill or project-specific planning instead
+- no meaningful implementation decision exists
+- the task is backend-only architecture beyond the current milestone
+
+## Planning Levels
+
+Use the lightest sufficient output.
+
+Complexity:
+- `L0`: local UI interaction; follow existing pattern, no full blueprint
+- `L1`: single-page function; short feature recipe
+- `L2`: cross-component or cross-page state; recipe + state/file map
+- `L3`: real API, permissions, upload, streaming, charts, maps, complex forms, or platform differences; decisions + contracts + verification
+- `L4`: high-risk capability: payments, destructive operations, auth/security, production data, real-time collaboration; safety gate and spike/approval
+
+Risk:
+- `R0`: pure display or local state
+- `R1`: ordinary form/list/filter
+- `R2`: real API/auth/pagination/cache
+- `R3`: upload/streaming/charts/maps/complex interaction/performance
+- `R4`: payment/permission/security/delete/production side effects
+
+Functional maturity:
+- `F0`: mock shape exists
+- `F1`: UI consumes mock service
+- `F2`: local interaction works
+- `F3`: real adapter seam wired, mock-to-real path clear
+- `F4`: real API verified for happy path
+- `F5`: edge cases, permissions, errors, retries, and regressions verified
+
+Report progress with both visual and functional maturity. UI visible is not functionally complete. Mock working is not real API verified.
+
+## Required Intake
+
+Before choosing technology, form a compact `project_profile`:
+- framework and platform targets
+- package manager
+- request layer
+- state layer
+- UI/styling layer
+- routing pattern
+- test layer
+- mock layer
+- env/config pattern
+- existing directories for pages, services, stores, composables, components, types, mocks, tests
+
+Also collect `nearby_patterns`: similar implemented files to copy. Near pattern beats new architecture.
 
 ## Decision Classes
 
-Classify every technical decision:
+Classify each decision:
+- `lock_now`: safe from repo conventions and known requirements
+- `spike_first`: needs a minimal experiment
+- `defer_to_implementation`: too small/local to plan
+- `blocked`: missing product/API/security facts
 
-- `lock_now`: safe to decide from current repo conventions and known requirements
-- `spike_first`: needs a small experiment before locking
-- `defer_to_implementation`: too small or too local to plan in advance
-- `blocked`: needs missing API/credential/security/product information
+Also record:
+- `source_confidence`: `confirmed`, `inferred`, `mocked`, or `unknown`
+- `reversibility`: `easy`, `medium`, or `hard`
+- `decision_cost`: `low`, `medium`, or `high`
+- evidence from package.json, existing code, docs, API, user requirement, or spike
 
-Do not pretend a `spike_first` or `blocked` decision is implementation-ready.
+Hard/high decisions should not be guessed. Use a spike or block.
 
-## Workflow
+## Dependency Rule
 
-### 1. Intake
-Read only what is needed:
-- product/feature requirements
-- existing repo stack and conventions
-- package manager and dependencies
-- routing, state, request, component, test, and mock patterns
-- known APIs and authentication constraints
-- visual/page blueprint if UI implementation will follow
-
-Output an assumption list and mark missing facts.
-
-### 2. Dependency Decisions
-Create or update `technical-decisions.json`.
-
-For each dependency or technical approach, record:
-- feature/use case
-- selected approach or library
-- status: `lock_now`, `spike_first`, `defer_to_implementation`, or `blocked`
-- reason
-- alternatives considered
-- install command when needed
-- usage boundary
-- owned files or modules
-- rollback/fallback plan
-
-Dependency rule:
-1. existing project code
+Default order:
+1. existing project code and nearby patterns
 2. installed dependency
 3. mature new dependency
 4. custom implementation
 
-### 3. Feature Recipes
-Create or update `feature-recipes.json`.
+Add a new dependency only when at least one is true:
+- self-build cost is clearly high
+- a mature library reduces risk
+- feature is complex: virtual list, charts, drag/drop, rich text, upload, map, streaming, form validation
+- same ecosystem dependency already exists
+- multiple features will reuse it
 
-For each feature, define:
-- target pages/routes/components
-- service/composable/store/module boundaries
-- data source and adapter plan
-- loading/empty/error states
-- mock behavior and real replacement source
-- permission/auth considerations
-- cache/persistence strategy
-- user feedback and failure recovery
-- verification items
-- maturity target for current milestone
+Record alternatives, install command, usage boundary, fallback, and must-not-do items such as “do not introduce axios if project uses alova”.
 
-Recipes must be executable by an implementation agent without re-deciding architecture.
+## Feature Recipes
 
-### 4. API and Integration Contracts
-Create `api-contracts.json` or `integration-plan.json` when APIs or external services matter.
+Each feature recipe should be concise and executable:
+- `complexity`, `risk`, `functional_maturity_target`
+- `file_map`: pages, components, services, adapters, stores, composables, types, mocks, tests
+- `implementation_order`: types -> mock -> adapter/service -> store/composable -> UI binding -> states -> real API -> tests
+- `demo_path`: route, user steps, success signal
+- `real_completion_path`: conditions required before claiming real completion
+- state/data/service boundaries
+- loading/empty/error/permission/offline states
+- mock-to-real seam and honest labels
+- config requirements by variable name only; never value
+- platform differences and fallback behavior
+- performance budget when relevant
+- testability: mockable boundaries and stable selectors
+- `must_not_do`
+- `technical_debt`
 
-Record:
-- endpoint or SDK method
-- request shape
-- response shape
-- pagination/streaming/upload semantics
-- auth requirements
-- error codes and retries
-- mock adapter shape
-- adapter location
-- unknowns/blockers
+## API, State, Mock, and Platform Rules
 
-Never store secrets, tokens, passwords, or private connection strings. Use placeholders such as `[REDACTED]` or environment variable names.
+API unknowns have three levels:
+- known API: write real contract
+- API unknown but business shape known: create adapter + mock contract
+- API and business both unclear: mark blocker
 
-### 5. State Management Plan
-Create `state-management-plan.json` when state is non-trivial.
+Use adapter seams:
+`page/component -> store/composable -> service -> adapter -> real API or mock API`.
 
-Classify state as:
-- component local
-- route/query
-- store/global
-- server cache
-- local persistence
-- real-time/subscription
+For platform targets, record differences. Example: H5 supports fetch streams; mp-weixin may need WebSocket, polling, or non-stream fallback.
 
-Record ownership, lifecycle, reset conditions, and persistence rules.
+## Visual Alignment
 
-### 6. Mock-to-Real Plan
-Create `mock-to-real-plan.json` when mock/demo data will precede real integration.
+When a visual blueprint exists, technical planning must check it:
+- visual element without function -> record `visual_elements_without_function`
+- feature state missing from visuals -> record `missing_states_in_visual`
+- technical constraint affecting UI -> record `requires_visual_deviation` or `needs_design_update`
 
-Record:
-- mock area
-- current behavior
-- real source
-- replacement stage
-- adapter seam
-- visible label requirement
-- verification needed before claiming real functionality
+If a GPT image invents product-like elements, do not silently implement them as real features. Route through product/visual approval.
 
-Mock is allowed as planned delivery. Fake completion is not.
+## Verification and Handoff
 
-### 7. Verification Matrix
-Create `verification-matrix.json`.
-
-For each feature/decision, define:
-- unit checks
-- integration checks
-- E2E/manual checks
-- build/type/lint expectations
-- mock vs real acceptance
-- risk level
+`verification-matrix.json` distinguishes:
+- mock acceptance
+- local interaction acceptance
+- real API acceptance
+- edge/regression acceptance
 - blocking vs non-blocking failures
 
-### 8. Technical Gate
+Include a short user-facing Technical Plan Summary:
+- real this milestone
+- mock this milestone
+- new dependencies
+- key risks/blockers
+- implementation order
+- maturity target, e.g. “target F3; not claiming F5”
+
+## Technical Gate
+
 Open `technical_gate` only when:
-- required decisions are `lock_now` or explicitly deferred
-- `spike_first` decisions have spike results or are out of current scope
-- blockers are resolved or user-waived
 - required files exist
+- current-scope decisions are `lock_now` or intentionally deferred
+- `spike_first` decisions have spike results or are out of current scope
+- blockers are resolved or explicitly waived
+- recipes define file_map and implementation_order for current scope
+- verification distinguishes mock, local, and real acceptance
 - checker passes
-
-## Outputs
-
-Default compact package:
-
-```text
-technical-decisions.json
-feature-recipes.json
-verification-matrix.json
-```
-
-Expanded package when needed:
-
-```text
-api-contracts.json
-state-management-plan.json
-mock-to-real-plan.json
-integration-plan.json
-technical-spikes/
-  <decision-id>.md
-```
+- no secrets/tokens/passwords/private connection strings are persisted
 
 ## Handoff to DesignToCode
 
-`design-to-code` should read:
+`design-to-code` should read in this order:
 1. visual `implementation-blueprint.json` when UI exists
 2. `technical-decisions.json`
 3. current-scope entries from `feature-recipes.json`
 4. current-scope entries from `verification-matrix.json`
-5. optional API/state/mock files only when the current feature references them
+5. optional API/state/mock/spike files only when referenced
 
-If visual and technical blueprints conflict:
-- product behavior and security constraints outrank visual convenience
-- approved visual layout still governs UI structure unless a change request/deviation is recorded
-- record accepted deviations instead of improvising in code
+Do not let implementation pick competing libraries, state architecture, API seams, or mock-to-real rules unless the technical plan is blocked or user-waived.
+
+## Feedback Loop
+
+If implementation finds the plan wrong:
+- small safe deviation -> record accepted deviation/finding
+- core technical assumption wrong -> return to IdeaToTech and refresh blueprint
+- visual impact -> notify `idea-to-design`
+- milestone/gate impact -> notify `PlanToDelivery`
+
+Blueprints are living contracts, not one-time prose.
 
 ## Token Budget
 
-Keep files short and indexed.
-- Use IDs and file refs instead of repeating long explanations.
-- Do not load all recipes for one small feature.
-- Put heavy spike notes under `technical-spikes/` and reference them.
-- Prefer JSON for implementation inputs and short Markdown only for spike results.
+Use JSON and IDs. Do not load every recipe for one feature. Put heavy experiments under `technical-spikes/` and reference them.
 
 ## Common Mistakes
 
 | Mistake | Fix |
 |---|---|
-| Choosing new libraries before reading package.json | Inspect existing stack first |
-| Treating guesses as decisions | Mark `spike_first` or `blocked` |
-| Planning every tiny helper | Mark local details `defer_to_implementation` |
-| Mock behavior reported as real | Use mock-to-real plan and verification matrix |
-| API unknowns hidden in prose | Put blockers in contracts and gate |
-| design-to-code picks libraries during coding | Move selection into `technical-decisions.json` first |
+| Choosing new libraries before reading package.json | Inspect project profile first |
+| Ignoring nearby implemented patterns | Reuse similar files by default |
+| Planning every tiny helper | Use L0/L1 lightweight mode |
+| Mock behavior reported as real | Track F0-F5 and mock-to-real plan |
+| API unknowns hidden in prose | Use contracts, source confidence, and blockers |
+| Functional states missing from visuals | Record visual_alignment and route back if needed |
+| design-to-code picks libraries during coding | Move choices into technical-decisions.json |
+| Hard/high decisions guessed | Spike or block |
 
 ## Success Criteria
 
 This skill succeeds when:
 - implementation agents know which libraries and approaches to use
-- feature code has clear service/store/composable/component boundaries
-- mock-to-real transitions are explicit
-- verification is planned before coding
-- risky decisions are spiked or blocked instead of guessed
+- file locations, boundaries, and order are clear
+- mock-to-real transitions and real-completion criteria are explicit
+- visual/functional conflicts are surfaced before coding
+- platform, config, fallback, and testability risks are planned
 - `design-to-code` can implement without redoing technical planning

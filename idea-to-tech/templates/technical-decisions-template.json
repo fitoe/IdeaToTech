@@ -1,5 +1,5 @@
 {
-  "version": 1,
+  "version": 2,
   "project": "",
   "technical_gate": {
     "status": "blocked",
@@ -7,18 +7,69 @@
     "opened_at": null,
     "blockers": []
   },
+  "project_profile": {
+    "framework": null,
+    "package_manager": null,
+    "request_layer": null,
+    "state_layer": null,
+    "ui_layer": null,
+    "routing": null,
+    "test_layer": null,
+    "mock_layer": null,
+    "platform_targets": [],
+    "evidence": []
+  },
+  "nearby_patterns": [
+    {
+      "pattern": "existing-list-or-feature-pattern",
+      "source_files": [],
+      "reuse_for": []
+    }
+  ],
   "decisions": [
     {
       "id": "decision-example",
-      "feature": "example feature",
-      "selected": "existing project pattern",
+      "feature": "feature-example",
+      "selected": "follow existing project pattern",
       "status": "lock_now",
-      "reason": "Matches current stack and avoids new dependency.",
+      "source_confidence": "confirmed",
+      "evidence": [],
+      "reason": "Existing code already provides the pattern.",
       "alternatives": [],
       "install": null,
-      "usage_boundary": "Use only for the scoped feature.",
-      "owned_files": [],
-      "fallback": "Use existing local implementation."
+      "usage_boundary": "current feature only",
+      "fallback": "existing local implementation",
+      "reversibility": "easy",
+      "decision_cost": "low",
+      "dependency_score": {
+        "fits_existing_stack": 5,
+        "bundle_cost": 5,
+        "maintenance": 5,
+        "api_quality": 4,
+        "cross_platform": 4,
+        "implementation_speed": 5,
+        "risk": 1
+      },
+      "must_not_do": []
     }
-  ]
+  ],
+  "read_order": [
+    "technical-decisions.json",
+    "feature-recipes.json#current-feature",
+    "verification-matrix.json#current-feature"
+  ],
+  "read_on_demand": [
+    "api-contracts.json",
+    "state-management-plan.json",
+    "mock-to-real-plan.json",
+    "technical-spikes/*"
+  ],
+  "technical_plan_summary": {
+    "real_this_milestone": [],
+    "mock_this_milestone": [],
+    "new_dependencies": [],
+    "key_risks": [],
+    "implementation_order": [],
+    "maturity_claim": "target F3; not claiming F5"
+  }
 }
