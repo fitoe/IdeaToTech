@@ -49,6 +49,13 @@ Do not use when:
 
 Use the lightest sufficient output.
 
+Default planning unit is a feature slice, not a page widget. Plan technical boundaries that affect implementation direction, consistency, risk, architecture, API, platform support, security, performance, or verification. Do not plan routine button handlers, local modal toggles, simple tab switches, helper names, minor CSS/animation, or internal component splits unless they affect one of those risks.
+
+Use three levels of detail:
+- must plan: architecture/cross-module decisions such as API, store, service, adapter, auth, mock-to-real, dependency, platform, performance, and verification
+- briefly plan: page or feature responsibilities, main states, dependent services/stores, maturity target, demo path, and real completion path
+- do not plan: ordinary click handlers, local variables, helper names, minor hover/transition details, and disposable component internals
+
 Complexity:
 - `L0`: local UI interaction; follow existing pattern, no full blueprint
 - `L1`: single-page function; short feature recipe
@@ -222,6 +229,7 @@ Use JSON and IDs. Do not load every recipe for one feature. Put heavy experiment
 | Choosing new libraries before reading package.json | Inspect project profile first |
 | Ignoring nearby implemented patterns | Reuse similar files by default |
 | Planning every tiny helper | Use L0/L1 lightweight mode |
+| Planning every button, tab, and modal toggle | Plan feature slices and risky boundaries, not routine widgets |
 | Mock behavior reported as real | Track F0-F5 and mock-to-real plan |
 | API unknowns hidden in prose | Use contracts, source confidence, and blockers |
 | Functional states missing from visuals | Record visual_alignment and route back if needed |
