@@ -208,6 +208,29 @@ Open `technical_gate` only when:
 
 Do not let implementation pick competing libraries, state architecture, API seams, or mock-to-real rules unless the technical plan is blocked or user-waived.
 
+
+## PlanToDelivery Project-State Collaboration
+
+When routed by `PlanToDelivery`, consume the active task from `project-state/execution-progress.json` and the required inputs from `project-state/artifact-manifest.json`. Do not directly modify global project-state unless explicitly authorized.
+
+Read design and product inputs from `routing.input_artifact_refs` first, especially `implementation_blueprint`, `page_matrix`, `component_blueprint`, and design debt. Produce technical artifacts, usually under `project-state/tech/`:
+- `technical-decisions.json`
+- `feature-recipes.json`
+- `verification-matrix.json`
+- `api-contracts.json` when API shape is known or mockable
+- `state-management-plan.json` when cross-component/page state matters
+- `mock-to-real-plan.json` when real integration is incomplete
+- `technical-spikes/*` for risky decisions
+
+Return compact suggestions to `PlanToDelivery`:
+- `suggested_manifest_entries` for produced technical artifacts
+- `suggested_progress_updates` for technical tasks, verification maturity, and dependencies
+- technical gate recommendation with evidence, but do not mark the global gate passed yourself
+- blockers for missing product facts, stale design inputs, unknown auth/API access, unsafe dependency choices, or unverified real integration
+- verification evidence that distinguishes mock, local interaction, real API, and edge/regression coverage
+
+If a design artifact conflicts with technical constraints, report `requires_visual_deviation` or `needs_design_update` and recommend routing back to `idea-to-design`. If implementation later disproves a core technical assumption, expect `PlanToDelivery` to route back here for a refreshed blueprint.
+
 ## Feedback Loop
 
 If implementation finds the plan wrong:
