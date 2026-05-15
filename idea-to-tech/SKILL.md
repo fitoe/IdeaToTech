@@ -45,6 +45,38 @@ Do not use when:
 - no meaningful implementation decision exists
 - the task is backend-only architecture beyond the current milestone
 
+## Low-Context Technical Blueprint Mode
+
+When routed by `PlanToDelivery`, this skill should plan only the active slice named in the invocation brief. Do not re-plan the whole application unless the active gate explicitly says the project profile or global architecture is stale.
+
+Rules:
+- read `project-state/execution-progress.json` and `artifact-manifest.json` only enough to resolve `active_task`, `scope`, and `input_artifact_refs`;
+- inspect only nearby patterns needed for the current feature slice; avoid broad repo scans after enough evidence exists;
+- output JSON artifacts under `project-state/tech/` and reference large spikes/logs by path;
+- do not paste full contracts, recipes, package dumps, or spike transcripts into the chat;
+- for L0/R0 or obvious L1 work, return `defer_to_implementation` with a short rationale instead of writing a full blueprint;
+- for each decision, include evidence paths/line refs rather than copied source content;
+- return a compact delta response for `PlanToDelivery`, not a long architectural narrative.
+
+Default delta response:
+
+```json
+{
+  "result": "completed | partial | blocked",
+  "changed_files": [],
+  "produced_artifacts": [],
+  "suggested_manifest_entries": [],
+  "suggested_progress_updates": [],
+  "suggested_blockers": [],
+  "suggested_gate_updates": [],
+  "evidence": [],
+  "largest_remaining_gaps": [],
+  "next_recommended_task": ""
+}
+```
+
+The user-facing summary should be at most: real this milestone, mock this milestone, new dependencies, blockers, implementation order, and maturity target.
+
 ## Planning Levels
 
 Use the lightest sufficient output.
@@ -222,12 +254,15 @@ Read design and product inputs from `routing.input_artifact_refs` first, especia
 - `mock-to-real-plan.json` when real integration is incomplete
 - `technical-spikes/*` for risky decisions
 
-Return compact suggestions to `PlanToDelivery`:
+Return compact delta suggestions to `PlanToDelivery`:
+- `result`: `completed`, `partial`, or `blocked`
+- `changed_files` and `produced_artifacts` for all technical artifacts created or updated
 - `suggested_manifest_entries` for produced technical artifacts
 - `suggested_progress_updates` for technical tasks, verification maturity, and dependencies
 - technical gate recommendation with evidence, but do not mark the global gate passed yourself
 - blockers for missing product facts, stale design inputs, unknown auth/API access, unsafe dependency choices, or unverified real integration
 - verification evidence that distinguishes mock, local interaction, real API, and edge/regression coverage
+- `next_recommended_task` when implementation can continue without another technical planning pass
 
 If a design artifact conflicts with technical constraints, report `requires_visual_deviation` or `needs_design_update` and recommend routing back to `idea-to-design`. If implementation later disproves a core technical assumption, expect `PlanToDelivery` to route back here for a refreshed blueprint.
 
