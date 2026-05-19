@@ -23,6 +23,30 @@ Standalone rule:
 - `idea-to-design` may provide product/page/interaction/visual inputs
 - `design-to-code` consumes outputs during implementation
 
+## Kanban Provider Mode
+
+Use this mode when invoked through a `kanban-capability-task/v1` envelope, a provider registry entry, or Javis/PlanToDelivery kanban dispatch. In this mode, `IdeaToTech` is a technical planning provider, not the global orchestrator and not the coding executor.
+
+Advertised capabilities:
+- `technical_blueprint`: implementation-ready technical decisions, architecture seams, file map, state/API/mock/platform decisions, and risk classification;
+- `implementation_planning`: ordered feature recipes, dependency boundaries, mock-to-real path, and implementation sequence for the active slice;
+- `verification_strategy`: verification matrix that distinguishes mock, local interaction, real API, edge/regression, blocking failures, and waivers.
+
+Provider rules:
+- consume the task envelope's active slice, capability, input artifact refs, target output root, and verification expectations;
+- inspect only the project evidence needed for that slice: project profile, nearby patterns, relevant package/config files, and referenced design/product artifacts;
+- output schema-valid artifacts under the requested output root when provided, otherwise under `project-state/tech/`;
+- return a `kanban-capability-result/v1`-shaped manifest with `capability`, `result`, `changed_files`, `produced_artifacts`, `evidence`, `blockers`, `debts`, `review_required`, and `next_recommended_task`;
+- do not mark global technical gates passed; recommend gate updates and let the orchestrator record them;
+- use `review_required: true` for hard/high decisions, dependency additions, mock-to-real boundaries, safety-sensitive verification, or assumptions that need orchestrator/human review; do not label these as `blocked` unless missing facts prevent a safe plan.
+
+Result semantics:
+- `completed`: the requested technical capability is ready for orchestrator review and downstream implementation;
+- `partial`: useful plan artifacts exist, but specific decisions, spikes, or verification rows remain;
+- `blocked`: required API/auth/product/security facts, repo access, or non-waivable technical constraints are missing.
+
+Keep the user-facing summary compact. Put detailed decisions, recipes, matrices, spike logs, and evidence references in files, then return manifest paths and the next recommended capability.
+
 Core rule:
 - prefer existing project conventions, nearby patterns, and installed dependencies before new architecture
 - front-load only decisions that affect speed, consistency, dependencies, data flow, API integration, state, platform compatibility, risk, or verification
