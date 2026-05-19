@@ -1,0 +1,21 @@
+{
+  "schema_version": "provider-manifest/v1",
+  "provider_id": "idea-to-tech",
+  "display_name": "IdeaToTech",
+  "capabilities": [
+    "technical_blueprint",
+    "implementation_planning",
+    "verification_strategy"
+  ],
+  "input_schema_refs": {
+    "technical_blueprint": "contracts/technical-blueprint-task-v1.md",
+    "implementation_planning": "contracts/implementation-planning-task-v1.md",
+    "verification_strategy": "contracts/verification-strategy-task-v1.md"
+  },
+  "result_schema_ref": "contracts/technical-result-manifest-v1.md",
+  "review_policy_notes": [
+    "Architecture approval is review_required, not blocked.",
+    "Use blocked for missing credentials, inaccessible systems, or contradictory requirements."
+  ],
+  "standalone_supported": true
+}
