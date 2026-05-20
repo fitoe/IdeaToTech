@@ -104,6 +104,16 @@ Typical artifacts:
 
 Use `review_required: true` for hard/high decisions, dependency additions, mock-to-real boundaries, safety-sensitive verification, or assumptions that need orchestrator/human review. This routes to review, not generic blocked.
 
+## Collaboration boundary
+
+- Upstream owner: PlanToDelivery/Javis provides the active slice, product/design artifact refs, repository scope, review policy, blocking policy, and allowed side effects.
+- Upstream design source: IdeaToDesign provides page/state/design artifacts when visual or product decisions are needed before technical planning.
+- Downstream consumers: DesignToCode or another implementation provider consumes locked decisions, recipes, file maps, API/state/mock plans, and verification expectations.
+- Provider output is advisory until PlanToDelivery ingests the manifest and records canonical state.
+- If visual direction or approved source is missing, recommend `product_visual_design` or `visual_source_creation`; do not invent visual decisions.
+- If code changes are required, recommend downstream implementation instead of performing them here.
+- See `docs/provider-collaboration-v2.md` in the source repository for the full provider boundary.
+
 ## Gate discipline
 
 - Providers recommend; Javis/PlanToDelivery records canonical gates.
