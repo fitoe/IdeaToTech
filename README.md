@@ -2,7 +2,6 @@
 
 [![Skill](https://img.shields.io/badge/agent--skill-IdeaToTech-2563eb)](#)
 [![Provider](https://img.shields.io/badge/Javis%20%2F%20PlanToDelivery-Kanban%20Provider-0ea5e9)](#)
-[![License](https://img.shields.io/badge/license-MIT-green)](LICENSE)
 
 **IdeaToTech turns product and design intent into an implementation-ready technical blueprint.**
 
