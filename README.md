@@ -1,42 +1,53 @@
 # IdeaToTech
 
-IdeaToTech is an Agent Skill for converting product functionality, feature behavior, project constraints, API facts, dependency choices, state management, mock strategy, and verification expectations into an implementation-ready technical blueprint.
+[![Skill](https://img.shields.io/badge/agent--skill-IdeaToTech-2563eb)](#)
+[![Provider](https://img.shields.io/badge/Javis%20%2F%20PlanToDelivery-Kanban%20Provider-0ea5e9)](#)
+[![License](https://img.shields.io/badge/license-MIT-green)](LICENSE)
 
-It sits between product/visual planning and implementation:
+**IdeaToTech turns product and design intent into an implementation-ready technical blueprint.**
+
+It sits between visual/product planning and code generation. Instead of jumping from “what we want” straight into implementation, IdeaToTech captures the technical decisions that make agent-built software predictable: architecture, API assumptions, state strategy, mocks, dependencies, risks, and verification.
 
 ```text
-idea-to-design -> IdeaToTech -> design-to-code
+IdeaToDesign -> IdeaToTech -> DesignToCode
         \          ^          /
          \         |         /
-          PlanToDelivery orchestration
+          PlanToDelivery Kanban orchestration
 ```
 
-Core outputs:
+## Why it is useful
 
-- `technical-decisions.json`
-- `feature-recipes.json`
-- `verification-matrix.json`
-- optional API/state/mock/integration plans
+- Convert feature behavior into concrete technical decisions.
+- Make API, state, dependency, and mock choices explicit before coding.
+- Produce verification plans that implementation agents can actually run.
+- Reduce drift between design intent and code delivery.
+- Give multi-agent workflows a stable technical handoff layer.
 
-The skill is intentionally narrow: it does not design visuals and does not write final implementation code.
+## Kanban provider mode
 
-## Javis / PlanToDelivery V2 provider mode
+IdeaToTech is a **Javis / PlanToDelivery V2 technical planning provider**.
 
-IdeaToTech is also a Javis/Kanban V2 technical planning provider kernel. It exposes these capabilities through `contracts/provider-manifest.json`:
+Through `contracts/provider-manifest.json`, it exposes:
 
 - `technical_blueprint`
 - `implementation_planning`
 - `verification_strategy`
 
-In provider mode, PlanToDelivery sends a `kanban-capability-task/v1` envelope and IdeaToTech returns a `kanban-capability-result/v1` manifest plus technical artifacts. PlanToDelivery owns provider registry routing, canonical gates, review, and progress. IdeaToTech owns only the active-slice technical artifacts and recommendations.
+When orchestrated by PlanToDelivery, tasks arrive as `kanban-capability-task/v1` envelopes and results return as `kanban-capability-result/v1` manifests. PlanToDelivery owns canonical Kanban gates, review, provider routing, and progress; IdeaToTech owns the active technical planning slice.
 
-Provider files:
+## Core outputs
 
-- [idea-to-tech/SKILL.md](idea-to-tech/SKILL.md) — runtime skill kernel
-- [contracts/provider-manifest.json](contracts/provider-manifest.json) — provider manifest
-- [contracts/technical-blueprint-task-v1.md](contracts/technical-blueprint-task-v1.md) — `technical_blueprint` task contract
-- [contracts/implementation-planning-task-v1.md](contracts/implementation-planning-task-v1.md) — `implementation_planning` task contract
-- [contracts/verification-strategy-task-v1.md](contracts/verification-strategy-task-v1.md) — `verification_strategy` task contract
-- [contracts/technical-result-manifest-v1.md](contracts/technical-result-manifest-v1.md) — result manifest contract
-- [docs/provider-collaboration-v2.md](docs/provider-collaboration-v2.md) — cross-provider boundaries and gate discipline
-- [docs/plans/2026-05-20-kanban-provider.md](docs/plans/2026-05-20-kanban-provider.md) — V2 provider redesign plan
+- `technical-decisions.json`
+- `feature-recipes.json`
+- `verification-matrix.json`
+- optional API, state, mock, dependency, and integration plans
+
+## What is inside
+
+- `idea-to-tech/SKILL.md` — the runtime skill kernel
+- `contracts/` — provider and task contracts
+- `docs/provider-collaboration-v2.md` — provider boundaries and gate discipline
+
+## Design philosophy
+
+IdeaToTech is intentionally narrow. It does not design visuals and does not write final code. It creates the technical agreement that lets design providers, code providers, and reviewers move fast without losing control.
