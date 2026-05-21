@@ -69,7 +69,7 @@ Minimum fields:
   "blockers": [],
   "debts": [],
   "review_required": false,
-  "suggested_gate_updates": [],
+  "suggested_kanban_updates": [],
   "next_recommended_task": null
 }
 ```
@@ -116,7 +116,10 @@ Use `review_required: true` for hard/high decisions, dependency additions, mock-
 
 ## Gate discipline
 
-- Providers recommend; Javis/PlanToDelivery records canonical gates.
+- Providers recommend; Javis/PlanToDelivery records canonical Kanban gates.
+- IdeaToTech must not create, complete, approve, or unlock Hermes Kanban stage Gates directly. In P2D mode it may only return `kanban-capability-result/v1` evidence plus `suggested_kanban_updates`; the orchestrator decides and applies concrete Kanban card/link/review transitions.
+- Technical planning artifacts, local JSON, provider manifests, and prose recommendations cannot unlock downstream implementation/release work by themselves.
+- If an architecture/API/mock-to-real/verification/release-readiness decision affects whether downstream work may start, report it as a suggested Kanban update with the proposed Gate/card title, dependency target, required approval evidence, and reason it affects stage admission.
 - Do not mark global technical gates passed.
 - Do not directly edit global execution progress unless the task explicitly authorizes it.
 - Skipped/waived verification must be labeled as `skipped` or `waived`, never `passed`.
