@@ -33,6 +33,57 @@ Do not use for pure visual exploration, routine button/local UI details, or dire
 
 Read only the active slice and referenced artifacts unless the task explicitly requests global architecture reconciliation.
 
+### Mandatory P2D provider admission
+
+When invoked by PlanToDelivery/Javis/P2D/Hermes Kanban, IdeaToTech must not begin planning from chat history, restored TODOs, or an informal `继续` instruction alone.
+
+Before producing canonical technical artifacts in P2D mode, verify:
+
+1. `kanban-capability-task/v1` task envelope path;
+2. `active-slice-digest/v1` path whose provenance matches the task envelope;
+3. `p2d-execution-permit/v1` at `output_root/execution-permit.json` signed for the same `task_id`, `capability`, `project_root`, `output_root`, `allowed_side_effects`, and `scope_hash`;
+4. capability is `technical_blueprint`, `implementation_planning`, or `verification_strategy`;
+5. current Hermes Kanban card is claimed/running for that task;
+6. `output_root` is defined and result manifest path will be `output_root/result-manifest.json`;
+7. `expected_outputs`, `verification_expectations`, and `allowed_side_effects` are explicit.
+
+Run the canonical P2D provider guard when available; it is authoritative over skill prose:
+
+```bash
+PYTHONPATH=/home/imjzq/Projects/PlanToDelivery python3 - <<'PY'
+from pathlib import Path
+from plantodelivery.provider_guard import validate_provider_execution_context
+ctx = validate_provider_execution_context(
+    task_envelope_path=Path('$OUTPUT_ROOT/task-envelope.json'),
+    active_slice_digest_path=Path('$OUTPUT_ROOT/active-slice-digest.json'),
+    execution_permit_path=Path('$OUTPUT_ROOT/execution-permit.json'),
+    expected_capability='technical_blueprint',  # or implementation_planning / verification_strategy
+    hermes_backend=backend,  # real PlanToDelivery/Hermes backend in orchestration
+)
+PY
+```
+
+If the guard cannot be run, the Kanban card is not running, or the permit is missing/mismatched, return a `blocked` result naming the missing artifact/check. Do not write technical artifacts first.
+
+Immediately before any filesystem write in P2D mode, run the public pre-write guard with the exact files about to change:
+
+```bash
+PYTHONPATH=/home/imjzq/Projects/PlanToDelivery \
+python3 /home/imjzq/Projects/PlanToDelivery/.agents/skills/plantodelivery/scripts/p2d_enforce.py \
+  --project-root "$PROJECT_ROOT" \
+  --board "$BOARD" \
+  prewrite \
+  --task-envelope "$OUTPUT_ROOT/task-envelope.json" \
+  --active-slice-digest "$OUTPUT_ROOT/active-slice-digest.json" \
+  --execution-permit "$OUTPUT_ROOT/execution-permit.json" \
+  --expected-capability "$CAPABILITY" \
+  --changed-file "relative/path/about-to-change"
+```
+
+Repeat `--changed-file` for every intended file. Run this before `write_file`, `patch`, planning artifact writes, verification matrix writes, evidence writes, or `result-manifest.json` writes. If `prewrite` exits non-zero, do not write; return a `blocked` result naming the guard error.
+
+The Python API `assert_provider_write_allowed(ctx, changed_files, review_required=...)` is the equivalent in-process guard, but the CLI above is preferred for auditability. Manifests, planning docs, and verification matrices are not allowed to bypass this check.
+
 Expected task envelope fields:
 
 - `schema: kanban-capability-task/v1`
