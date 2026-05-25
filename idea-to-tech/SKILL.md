@@ -1,141 +1,64 @@
 ---
 name: IdeaToTech
-description: Technical planning provider kernel. Use when a Javis/Kanban task envelope requests technical_blueprint, implementation_planning, or verification_strategy and the output must be contract artifacts/result manifests, not orchestration or coding.
+description: Use when a Javis/Kanban card needs technical planning, architecture seams, API/state/mock boundaries, implementation sequencing, risk classification, or verification strategy before coding.
+version: 3.0.0
+author: Hermes Agent
+license: MIT
+metadata:
+  hermes:
+    tags: [technical-planning, architecture, verification, kanban-worker]
+    related_skills: [PlanToDelivery, idea-to-design, design-to-code]
 ---
 
-# IdeaToTech — Technical Provider Kernel
+# IdeaToTech — Technical Specialist Worker
 
-## Role
+## Overview
 
-`IdeaToTech` is a bounded **technical planning provider** for Javis/Kanban. It converts active-slice product/design/repository evidence into implementation-ready technical artifacts that the orchestrator can review and route to implementation.
+IdeaToTech is a bounded technical planning specialist for Javis/Kanban. It turns a single active slice into decisions, implementation sequence, and verification expectations.
 
-It is not the project orchestrator, not the UI designer, and not the coding executor.
+It does not own the project board, global gates, product/design approval, or implementation code. It may suggest Kanban updates; Javis decides and records them.
 
-## When to activate
+## When to Use
 
-Use this skill when:
+Use this skill when a card asks for technical blueprinting, implementation planning, API/state/mock strategy, dependency decisions, file-map planning, risk classification, or verification strategy.
 
-- invoked by a `kanban-capability-task/v1` envelope;
-- the requested capability is `technical_blueprint`, `implementation_planning`, or `verification_strategy`;
-- implementation would otherwise need to choose architecture, dependencies, API seams, state shape, mock-to-real boundaries, file locations, or verification strategy during coding.
+Do not use it for visual exploration, design generation, routine CSS tweaks, or direct coding.
 
-Do not use for pure visual exploration, routine button/local UI details, or direct code implementation.
+## Input Contract
 
-## Advertised capabilities
+Expect a Kanban card or equivalent handoff with:
 
-| Capability | Output intent |
-|---|---|
-| `technical_blueprint` | technical decisions, architecture seams, project profile, file map, state/API/mock/platform decisions, risk classification |
-| `implementation_planning` | ordered feature recipes, implementation sequence, dependency boundaries, mock-to-real path, demo and real-completion paths |
-| `verification_strategy` | verification matrix distinguishing mock, local interaction, real API, edge/regression, blockers, failures, and waivers |
-
-## Inputs
-
-Read only the active slice and referenced artifacts unless the task explicitly requests global architecture reconciliation.
-
-### Mandatory P2D provider admission
-
-When invoked by PlanToDelivery/Javis/P2D/Hermes Kanban, IdeaToTech must not begin planning from chat history, restored TODOs, or an informal `继续` instruction alone.
-
-Before producing canonical technical artifacts in P2D mode, verify:
-
-1. `kanban-capability-task/v1` task envelope path;
-2. `active-slice-digest/v1` path whose provenance matches the task envelope;
-3. `p2d-execution-permit/v1` at `output_root/execution-permit.json` signed for the same `task_id`, `capability`, `project_root`, `output_root`, `allowed_side_effects`, and `scope_hash`;
-4. capability is `technical_blueprint`, `implementation_planning`, or `verification_strategy`;
-5. current Hermes Kanban card is claimed/running for that task;
-6. `output_root` is defined and result manifest path will be `output_root/result-manifest.json`;
-7. `expected_outputs`, `verification_expectations`, and `allowed_side_effects` are explicit.
-
-Run the canonical P2D provider guard when available; it is authoritative over skill prose:
-
-```bash
-PYTHONPATH=/home/imjzq/Projects/PlanToDelivery python3 - <<'PY'
-from pathlib import Path
-from plantodelivery.provider_guard import validate_provider_execution_context
-ctx = validate_provider_execution_context(
-    task_envelope_path=Path('$OUTPUT_ROOT/task-envelope.json'),
-    active_slice_digest_path=Path('$OUTPUT_ROOT/active-slice-digest.json'),
-    execution_permit_path=Path('$OUTPUT_ROOT/execution-permit.json'),
-    expected_capability='technical_blueprint',  # or implementation_planning / verification_strategy
-    hermes_backend=backend,  # real PlanToDelivery/Hermes backend in orchestration
-)
-PY
+```yaml
+goal:
+scope:
+inputs:
+allowed_changes:
+acceptance:
+evidence_required:
+execution_mode: fast | controlled | strict
 ```
 
-If the guard cannot be run, the Kanban card is not running, or the permit is missing/mismatched, return a `blocked` result naming the missing artifact/check. Do not write technical artifacts first.
-
-Immediately before any filesystem write in P2D mode, run the public pre-write guard with the exact files about to change:
-
-```bash
-PYTHONPATH=/home/imjzq/Projects/PlanToDelivery \
-python3 /home/imjzq/Projects/PlanToDelivery/.agents/skills/plantodelivery/scripts/p2d_enforce.py \
-  --project-root "$PROJECT_ROOT" \
-  --board "$BOARD" \
-  prewrite \
-  --task-envelope "$OUTPUT_ROOT/task-envelope.json" \
-  --active-slice-digest "$OUTPUT_ROOT/active-slice-digest.json" \
-  --execution-permit "$OUTPUT_ROOT/execution-permit.json" \
-  --expected-capability "$CAPABILITY" \
-  --changed-file "relative/path/about-to-change"
-```
-
-Repeat `--changed-file` for every intended file. Run this before `write_file`, `patch`, planning artifact writes, verification matrix writes, evidence writes, or `result-manifest.json` writes. If `prewrite` exits non-zero, do not write; return a `blocked` result naming the guard error.
-
-The Python API `assert_provider_write_allowed(ctx, changed_files, review_required=...)` is the equivalent in-process guard, but the CLI above is preferred for auditability. Manifests, planning docs, and verification matrices are not allowed to bypass this check.
-
-Expected task envelope fields:
-
-- `schema: kanban-capability-task/v1`
-- `task_id`
-- `capability`
-- `project_root`
-- `active_slice`
-- `input_artifact_refs`
-- `output_root`
-- `expected_outputs`
-- `verification_expectations`
-- `allowed_side_effects`
-- `review_policy`
-- `blocking_policy`
-
-Use artifact paths and nearby repo evidence as source of truth. Do not rely on long conversation memory.
+If the task arrives through strict P2D provider mode, honor the provided envelope/digest/permit/prewrite guard. Otherwise use the lightweight card contract and produce artifacts only in the permitted output path.
 
 ## Outputs
 
-Return a `kanban-capability-result/v1`-shaped manifest.
-
-Minimum fields:
+Return concise evidence that Javis can ingest:
 
 ```json
 {
-  "schema": "kanban-capability-result/v1",
-  "task_id": "",
-  "capability": "technical_blueprint | implementation_planning | verification_strategy",
   "provider": "IdeaToTech",
   "result": "completed | partial | blocked | failed",
-  "changed_files": [],
   "produced_artifacts": [],
-  "evidence": [],
+  "decisions": [],
+  "risks": [],
+  "verification": [],
   "blockers": [],
-  "debts": [],
-  "review_required": false,
   "suggested_kanban_updates": [],
-  "next_recommended_task": null
+  "review_required": false
 }
 ```
 
-Detailed decisions, recipes, matrices, spike logs, package evidence, and source line references must live in files referenced by the manifest.
-
-## Artifact locations
-
-Use the requested `output_root` when provided. Otherwise default to:
-
-```text
-project-state/tech/
-```
-
-Typical artifacts:
+Use files for heavy artifacts when needed:
 
 - `technical-decisions.json`
 - `feature-recipes.json`
@@ -143,71 +66,55 @@ Typical artifacts:
 - `api-contracts.json`
 - `state-management-plan.json`
 - `mock-to-real-plan.json`
-- `integration-plan.json`
-- `technical-spikes/*`
 
-## Result semantics
+## Planning Rules
 
-- `completed`: requested technical artifacts are ready for orchestrator review and downstream implementation.
-- `partial`: useful artifacts exist, but specific decisions, spikes, verification rows, or API facts remain.
-- `blocked`: required API/auth/product/security facts, repo access, or non-waivable technical constraints are missing.
-- `failed`: the provider could not produce usable artifacts; include cause and recovery suggestion.
+1. Inspect nearby repo patterns before proposing new architecture.
+2. Lock only decisions that affect dependencies, API seams, state shape, platform behavior, verification, or downstream sequencing.
+3. Mark trivial local implementation choices as `defer_to_implementation`.
+4. Classify each decision: `lock_now`, `spike_first`, `defer_to_implementation`, or `blocked`.
+5. Distinguish mock/local/real maturity: F0 mock shape, F1 UI consumes mock, F2 local interaction, F3 adapter seam, F4 real happy path, F5 errors/permissions/regressions.
+6. Never persist secret values; record variable names and setup requirements only.
+7. If design/source approval is missing, suggest an `idea-to-design` card instead of inventing visuals.
+8. If code must change, suggest a downstream implementation card instead of editing code here.
 
-Use `review_required: true` for hard/high decisions, dependency additions, mock-to-real boundaries, safety-sensitive verification, or assumptions that need orchestrator/human review. This routes to review, not generic blocked.
+## Mode Behavior
 
-## Collaboration boundary
+| Mode | Behavior |
+|---|---|
+| `fast` | short decisions + file map + minimal checks |
+| `controlled` | explicit decision table, risk list, verification matrix, downstream dependencies |
+| `strict` | follow P2D envelope/digest/permit/prewrite/audit requirements exactly |
 
-- Upstream owner: PlanToDelivery/Javis provides the active slice, product/design artifact refs, repository scope, review policy, blocking policy, and allowed side effects.
-- Upstream design source: IdeaToDesign provides page/state/design artifacts when visual or product decisions are needed before technical planning.
-- Downstream consumers: DesignToCode or another implementation provider consumes locked decisions, recipes, file maps, API/state/mock plans, and verification expectations.
-- Provider output is advisory until PlanToDelivery ingests the manifest and records canonical state.
-- If visual direction or approved source is missing, recommend `product_visual_design` or `visual_source_creation`; do not invent visual decisions.
-- If code changes are required, recommend downstream implementation instead of performing them here.
-- See `docs/provider-collaboration-v2.md` in the source repository for the full provider boundary.
+## Suggested Kanban Updates
 
-## Gate discipline
+Suggest a new card or gate when technical facts affect downstream start:
 
-- Providers recommend; Javis/PlanToDelivery records canonical Kanban gates.
-- IdeaToTech must not create, complete, approve, or unlock Hermes Kanban stage Gates directly. In P2D mode it may only return `kanban-capability-result/v1` evidence plus `suggested_kanban_updates`; the orchestrator decides and applies concrete Kanban card/link/review transitions.
-- Technical planning artifacts, local JSON, provider manifests, and prose recommendations cannot unlock downstream implementation/release work by themselves.
-- If an architecture/API/mock-to-real/verification/release-readiness decision affects whether downstream work may start, report it as a suggested Kanban update with the proposed Gate/card title, dependency target, required approval evidence, and reason it affects stage admission.
-- Do not mark global technical gates passed.
-- Do not directly edit global execution progress unless the task explicitly authorizes it.
-- Skipped/waived verification must be labeled as `skipped` or `waived`, never `passed`.
-- If implementation can proceed, recommend `visual_implementation` or the relevant next capability.
+```yaml
+title:
+type: tech | implementation | verification | gate
+reason:
+depends_on:
+acceptance:
+evidence_required:
+```
 
-## Operating rules
+Do not create, complete, or approve project-level gates yourself.
 
-1. Build the lightest sufficient `project_profile`: framework, package manager, request layer, state layer, UI/styling, routing, test layer, mock layer, env/config pattern, and relevant directories.
-2. Prefer nearby implemented patterns and installed dependencies before proposing new architecture.
-3. Plan only decisions that affect speed, consistency, dependencies, data flow, API integration, state, platform compatibility, risk, or verification.
-4. Do not plan routine local handlers, helper names, tiny component internals, or trivial CSS/animation.
-5. Classify decisions as `lock_now`, `spike_first`, `defer_to_implementation`, or `blocked` with evidence.
-6. Record functional maturity honestly: `F0` mock shape, `F1` UI consumes mock, `F2` local interaction, `F3` real adapter seam, `F4` real API happy path, `F5` edge/permissions/errors/regressions.
-7. Unknown API with known business shape gets adapter + mock contract; unknown API and unknown business shape is a blocker.
-8. Never persist secret values; only variable names and configuration requirements.
-
-## Progressive references
-
-Load only when needed:
-
-- `references/main-skill-full-reference.md` — legacy detailed technical planning workflow.
-- `templates/technical-decisions-template.json` — decision artifact shape.
-- `templates/feature-recipes-template.json` — implementation recipe shape.
-- `templates/verification-matrix-template.json` — verification matrix shape.
-- `contracts/technical-blueprint-task-v1.md` — capability task contract.
-- `contracts/implementation-planning-task-v1.md` — capability task contract.
-- `contracts/verification-strategy-task-v1.md` — capability task contract.
-- `contracts/technical-result-manifest-v1.md` — provider result contract.
-
-## Common pitfalls
+## Common Pitfalls
 
 | Pitfall | Fix |
 |---|---|
-| Acting as global project owner | Return manifest recommendations; let Javis update canonical state |
-| Choosing new libraries before evidence | Inspect project profile and nearby patterns first |
-| Planning tiny local UI details | Use `defer_to_implementation` for L0/R0 work |
-| Hiding API/auth unknowns in prose | Emit blockers or mock-to-real plan with honest maturity |
-| Reporting mock as real | Use F0-F5 maturity and verification evidence |
-| Letting implementation choose architecture | Lock or explicitly defer decisions in artifacts |
-| Marking review as blocked | Use `review_required: true`; reserve `blocked` for missing/unsafe facts |
+| Acting as architect for the whole project | Stay inside active slice unless global reconciliation is requested |
+| Planning every tiny handler | Defer routine details to implementation |
+| Hiding unknown API/auth | Emit blocker or mock-to-real plan with maturity label |
+| Reporting mocks as real | Use F0-F5 labels and evidence |
+| Choosing libraries without evidence | Prefer existing dependencies and local patterns |
+
+## Verification Checklist
+
+- [ ] Scope is the active card only.
+- [ ] Decisions are classified and evidence-backed.
+- [ ] API/auth/mock unknowns are explicit.
+- [ ] Verification distinguishes mock/local/real/edge checks.
+- [ ] Suggested Kanban updates are advisory and dependency-ready.
